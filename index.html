@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://code.createjs.com/easeljs-0.6.0.min.js"></script>
+
+
+<script>
+
+
+
+
+$(function () {
+
+    $.widget("custom.threesixty", {
+        // default options
+        options: {
+
+        },
+
+        // the constructor
+        _create: function () {
+            
+            this.start();
+        },
+
+
+        _refresh: function () {
+
+        },
+
+
+        // events bound via _on are removed automatically
+        // revert other modifications here
+        _destroy: function () {
+
+        },
+
+        // _setOptions is called with a hash of all options that are changing
+        // always refresh when changing options
+        _setOptions: function () {
+            // _super and _superApply handle keeping the right this-context
+            this._superApply(arguments);
+            this._refresh();
+        },
+
+        // _setOption is called for each individual option that is changing
+        _setOption: function (key, value) {
+
+            this._super(key, value);
+        },
+        setCursor: function (cursor) {
+            document.body.style.cursor = cursor;
+        },
+        render: function () {
+            //load in a new render
+            this.fileCount = this.el.data("file-count");
+            this.path = this.el.data("file-path");
+            this.startFrame = 10;
+
+            //create img list
+            this.imgList = [];
+
+            console.log("this.fileCount", this.fileCount);
+            console.log("this.path", this.path);
+
+            for (i = 1; i <= this.fileCount; i++) {
+                this.imgList.push(this.path + i + ".jpg");
+            }
+
+/*
+            this.imgList = ["http://jsrun.it/assets/N/b/D/X/NbDXj.jpg",
+                "http://jsrun.it/assets/f/K/7/y/fK7yE.jpg",
+                "http://jsrun.it/assets/j/U/q/d/jUqdG.jpg",
+                "http://jsrun.it/assets/q/o/4/j/qo4jP.jpg",
+                "http://jsrun.it/assets/i/Q/e/1/iQe1f.jpg",
+                "http://jsrun.it/assets/5/k/y/R/5kyRi.jpg",
+                "http://jsrun.it/assets/x/T/I/h/xTIhA.jpg",
+                "http://jsrun.it/assets/4/X/G/F/4XGFt.jpg",
+                "http://jsrun.it/assets/6/7/n/r/67nrO.jpg",
+                "http://jsrun.it/assets/k/i/r/8/kir8T.jpg",
+                "http://jsrun.it/assets/2/3/F/q/23Fqt.jpg",
+                "http://jsrun.it/assets/c/l/d/5/cld59.jpg",
+                "http://jsrun.it/assets/e/J/O/f/eJOf1.jpg",
+                "http://jsrun.it/assets/o/j/Z/x/ojZx4.jpg",
+                "http://jsrun.it/assets/w/K/2/m/wK2m3.jpg",
+                "http://jsrun.it/assets/w/K/2/m/wK2m3.jpg",
+                "http://jsrun.it/assets/4/b/g/V/4bgVf.jpg",
+                "http://jsrun.it/assets/4/m/1/8/4m18z.jpg",
+                "http://jsrun.it/assets/4/w/b/F/4wbFX.jpg",
+                "http://jsrun.it/assets/4/k/T/G/4kTGQ.jpg",
+                "http://jsrun.it/assets/s/n/C/r/snCrr.jpg",
+                "http://jsrun.it/assets/7/f/H/u/7fHuI.jpg",
+                "http://jsrun.it/assets/v/S/d/F/vSdFm.jpg",
+                "http://jsrun.it/assets/m/g/c/S/mgcSp.jpg",
+                "http://jsrun.it/assets/t/L/t/P/tLtPF.jpg",
+                "http://jsrun.it/assets/j/7/e/H/j7eHx.jpg",
+                "http://jsrun.it/assets/m/o/8/I/mo8Ij.jpg",
+                "http://jsrun.it/assets/n/P/7/h/nP7ht.jpg",
+                "http://jsrun.it/assets/z/f/K/S/zfKSP.jpg",
+                "http://jsrun.it/assets/2/3/4/U/234U6.jpg",
+                "http://jsrun.it/assets/d/Z/y/m/dZymk.jpg"];
+*/
+
+            this.totalFrames = this.imgList.length;
+        },
+        reInit: function () {
+            this.loaded = 0; //reset
+            this.render();
+            this.load360Image(false);
+        },
+        start: function () {
+            var self = this;
+            this.el = this.element
+            console.log(">>>element", this.element);
+            
+
+            this.canvas = this.el[0];
+            if (!this.canvas || !this.canvas.getContext) {
+                return;
+            }
+            console.log(">>>methods.canvas", this.canvas);
+
+            this.stage = new createjs.Stage(this.canvas);
+            this.stage.enableMouseOver(true);
+            this.stage.mouseMoveOutside = true;
+            createjs.Touch.enable(this.stage);
+
+            this.images = [];
+            this.loaded = 0;
+            this.currentFrame = 0
+            this.rotate360Interval;
+            this.start_x;
+
+            this.bg = new createjs.Shape();
+            this.stage.addChild(this.bg);
+
+            this.bmp = new createjs.Bitmap();
+            this.stage.addChild(this.bmp);
+
+            var myTxt = new createjs.Text("HTC One", '24px Ubuntu', "#ffffff");
+            myTxt.x = myTxt.y = 20;
+            myTxt.alpha = 0.08;
+            this.stage.addChild(myTxt);
+
+            this.setCursor("progress");
+
+            this.render();
+            //console.log(this.el[0]);
+            this.load360Image(true);
+
+            // TICKER
+            createjs.Ticker.addEventListener("tick", function (event) {
+                self.stage.update();
+            });
+            createjs.Ticker.setFPS(60);
+            createjs.Ticker.useRAF = true;
+
+            return this.canvas;
+        },
+        load360Image: function (spin) {
+            var img = new Image();
+            //img.crossOrigin = "Anonymous";
+
+            img.src = this.imgList[this.loaded];
+
+            this.img360Loaded(img, spin);
+            this.images[this.loaded] = img;
+        },
+        img360Loaded: function (img, spin) {
+            console.log("LOAD IMG", this.el[0], img);
+            var that = this;
+            img.onload = function (event) {
+                //console.log(img);
+
+                that.loaded++;
+                that.bg.graphics.clear()
+                that.bg.graphics.beginFill("#222").drawRect(0, 0, that.stage.canvas.width * that.loaded / that.totalFrames, that.stage.canvas.height);
+                that.bg.graphics.endFill();
+
+
+                if (that.loaded == that.totalFrames) {
+                    that.start360(spin);
+                } else {
+                    that.load360Image(spin);
+                }
+
+                //console.log(">>LOAD IMG DONE", that.el[0]);
+            }
+        },
+        start360: function (spin) {
+            this.setCursor("none");
+
+            // 360 icon
+            var iconImage = new Image();
+            //iconImage.crossOrigin = "Anonymous";
+            iconImage.src = this.el.data("icon-path") + "360.png";
+            this.iconLoaded(iconImage);
+
+            // update-draw
+            this.update360(0);
+
+            if (spin) {
+                this.revolveOnce(function () {
+                    //console.log("done");
+                }, 25);
+            }
+            this.setCursor("auto");
+        },
+        revolveOnce: function (callback, speed) {
+            var self = this;
+            // first rotation
+            self.rotate360Interval = setInterval(function () {
+                if (self.currentFrame === self.totalFrames - 1) {
+                    clearInterval(self.rotate360Interval);
+                    self.addNavigation();
+                }
+                self.update360(1);
+
+                if (self.currentFrame === self.totalFrames - 1) {
+                    callback();
+                }
+            }, speed);
+        },
+        iconLoaded: function (iconImage) {
+            var self = this;
+            iconImage.onload = function (event) {
+                var iconBmp = new createjs.Bitmap();
+                iconBmp.image = event.target;
+                iconBmp.x = 20;
+                iconBmp.y = self.canvas.height - iconBmp.image.height - 70;
+                self.stage.addChild(iconBmp);
+            }
+        },
+        setFrame: function (newFrame) {
+            this.bmp.image = this.images[newFrame];
+        },
+        addNavigation: function () {
+
+            var self = this;
+
+            self.stage.onMouseOver = function (event) {
+                self.setCursor("pointer");
+            }
+
+            self.stage.onMouseDown = function (event) {
+                self.start_x = event.rawX;
+                self.stage.onMouseMove = self.mouseMoved;
+
+                self.stage.onMouseMove = function (event) {
+                    var dx = event.rawX - self.start_x;
+                    var abs_dx = Math.abs(dx);
+
+                    if (abs_dx > 5) {
+                        self.update360(dx / abs_dx);
+                        self.start_x = event.rawX;
+                    }
+                }
+
+                self.stage.onMouseUp = function (event) {
+                    self.stage.onMouseMove = null;
+                    self.stage.onMouseUp = null;
+                    self.setCursor("pointer");
+                    self.changeOnStage(this, self.currentFrame);
+                }
+
+                self.setCursor("w-resize");
+            }
+
+
+            this.setCursor("auto");
+        },
+        update360: function (dir) {
+            this.currentFrame += dir;
+
+            if (this.currentFrame < 0) {
+                this.currentFrame = this.totalFrames - 1;
+            } else if (this.currentFrame > this.totalFrames - 1) {
+                this.currentFrame = 0;
+            }
+            this.bmp.image = this.images[this.currentFrame];
+        }
+    });
+    $('[data-init="table"]').threesixty()
+    $("#trigger").click(function () {
+        console.log("try other method");
+        $("#two").data("file-path", "mobile4").data("file-count", 20);
+        $("#two").threesixty("reInit");
+    });
+})
+
+</script>
+
+</head>
+<body>
+
+
+
+<canvas id="one" data-init="table" width="847" height="847" data-file-path="img/large/watch1/" data-file-count=28>1</canvas>
+<canvas id="two" data-init="table" width="847" height="847" data-file-path="img/large/watch2/" data-file-count=28>2</canvas>
+<button id="trigger">Do Reinit</button>
+
+
+ 
+
+</body>
+</html>

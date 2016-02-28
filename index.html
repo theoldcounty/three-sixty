@@ -195,10 +195,10 @@ $(function () {
             this.setCursor("none");
 
             // 360 icon
-            var iconImage = new Image();
+            //var iconImage = new Image();
             //iconImage.crossOrigin = "Anonymous";
-            iconImage.src = this.el.data("icon-path") + "360.png";
-            this.iconLoaded(iconImage);
+            //iconImage.src = this.el.data("icon-path") + "360.png";
+            //this.iconLoaded(iconImage);
 
             // update-draw
             this.update360(0);
@@ -287,7 +287,7 @@ $(function () {
     $('[data-init="table"]').threesixty()
     $("#trigger").click(function () {
         console.log("try other method");
-        $("#two").data("file-path", "mobile4").data("file-count", 20);
+        $("#two").data("file-path", "img/small/watch1/").data("file-count", 28);
         $("#two").threesixty("reInit");
     });
 })
@@ -298,9 +298,8 @@ $(function () {
 <body>
 
 
-
-<canvas id="one" data-init="table" width="847" height="847" data-file-path="img/large/watch1/" data-file-count=28>1</canvas>
-<canvas id="two" data-init="table" width="847" height="847" data-file-path="img/large/watch2/" data-file-count=28>2</canvas>
+<canvas id="one" data-init="table" width="847" height="847" data-icon-path="img/" data-file-path="img/large/watch1/" data-file-count=28>1</canvas>
+<canvas id="two" data-init="table" width="847" height="847" data-icon-path="img/"  data-file-path="img/large/watch2/" data-file-count=28>2</canvas>
 <button id="trigger">Do Reinit</button>
 
 
